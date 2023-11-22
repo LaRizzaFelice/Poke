@@ -1,70 +1,46 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axios from "axios";
+import { useEffect } from "react";
 
-interface Pokemon {
-  name: string;
-  id: number;
-  types: string[];
-  height: number;
-  weight: number;
-  abilities: string[];
-  species: { name: string };
-  moves: { move: { name: string } }[];
+type PokemonSkils(
+  name: string,
+  calories: number,
+  fat: number,
+  carbs: number,
+  protein: number,
+) {
+  return { name, calories, fat, carbs, protein };
 }
 
-interface PokemonDetailProps extends RouteComponentProps<{ name: string }> {}
+const rows = [
+  PokemonSkils('Frozen yoghurt', 159, 6.0, 24, 4.0),
+  PokemonSkils('Ice cream sandwich', 237, 9.0, 37, 4.3),
+  PokemonSkils('Eclair', 262, 16.0, 24, 6.0),
+  PokemonSkils('Cupcake', 305, 3.7, 67, 4.3),
+  PokemonSkils('Gingerbread', 356, 16.0, 49, 3.9),
+];
 
-const PokemonDetail: React.FC<PokemonDetailProps> = ({ match }) => {
-  const { name } = match.params;
-  const [pokemon, setPokemon] = useState<Pokemon | null>(null);
+
+export default function PokéCard() {
+  const [pokemonData, setPokemonData] = useState<PokemonSkils[]>([]);
 
   useEffect(() => {
-    axios.get(`https://pokeapi.co/api/v2/pokemon/${name}`)
-      .then((response) => {
-        const data = response.data;
-        setPokemon({
-          name: data.name,
-          id: data.id,
-          types: data.types.map((type: any) => type.type.name),
-          height: data.height,
-          weight: data.weight,
-          abilities: data.abilities.map((ability: any) => ability.ability.name),
-          species: { name: data.species.name },
-          moves: data.moves.slice(0, 5), // Limiting to the first 5 moves for simplicity
-        });
+    // Fetch data from the PokeAPI
+    axios.get('https://pokeapi.co/api/v2/pokemon/ditto')
+      .then(response => {
+        setPokemonData(response.data.results);
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error fetching Pokémon data:', error);
       });
-  }, [name]);
+  }, []);
 
-  if (!pokemon) {
-    return <div>Loading...</div>;
-  }
+return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '16px' }}>
+  {pokemonData.map((PokemonSkils) => (
 
-  const { id, types, height, weight, abilities, species, moves } = pokemon;
 
-  return (
-    <div>
-      <h2>{name}</h2>
-      <img
-        src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`}
-        alt={name}
-      />
-      <p>ID: {id}</p>
-      <p>Types: {types.join(', ')}</p>
-      <p>Height: {height} decimetres</p>
-      <p>Weight: {weight} hectograms</p>
-      <p>Abilities: {abilities.join(', ')}</p>
-      <p>Species: {species.name}</p>
-      <h3>Moves</h3>
-      <ul>
-        {moves.map((move, index) => (
-          <li key={index}>{move.move.name}</li>
-        )}
-      </ul>
-    </div>
+    
+  ))}
+</div>
   );
-};
-
-export default PokemonDetail;
+}
